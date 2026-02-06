@@ -324,11 +324,14 @@ Ești pregătită?`,
       q1: {
         title: "Întrebarea 1",
         text:
-`Prima întrebare e mai mult așa de acomodare :)))
-Cine a spus primul „te iubesc”?`,
+`În povestea noastră a existat un moment mic, dar care a schimbat totul, o clipă în care emoțiile au fost mai puternice decât tăcerea, 
+iar două cuvinte simple au devenit începutul a ceva mult mai mare.
+
+Întrebarea este: cine a spus primul te iubesc?
+`,
         choices: [
-          { label: "eu", next: "q2" },
-          { label: "tu", next: "q1_wrong" }
+          { label: "eu(Elena)", next: "q2" },
+          { label: "tu(Dragoș)", next: "q1_wrong" }
         ]
       },
 
@@ -346,12 +349,13 @@ trebuie să recunosc că tu ai fost prima care a spus „te iubesc”, deși sun
       q2: {
         title: "Întrebarea 2",
         text:
-`foarte bine.
 
-dacă ai trecut de prima întrebare.
-următoarea întrebare este:
+`
+Timpul a trecut altfel de când suntem noi, uneori prea repede, alteori exact cât trebuie pentru a aduna amintiri care contează. 
+Fiecare zi a mai adăugat încă o pagină la povestea noastră.
 
-de câte luni suntem împreună?`,
+Adtfel te voi supune unui mic calcul matematic, de câte luni suntem împreună?
+`,
         choices: [
           { label: "15", next: "q3" },
           { label: "14", next: "q2_wrong" }
@@ -369,10 +373,14 @@ de câte luni suntem împreună?`,
       q3: {
         title: "Întrebarea 3",
         text:
-`foarte bine, ai trecut și de întrebarea asta.
-să te văd acum.
+`Foarte bine, ai trecut și de întrebarea asta.
 
-la ce oră și în ce loc am oficializat relația?`,
+unele momente nu sunt doar despre începuturi, ci despre alegerea conștientă de a merge mai departe împreună. 
+a existat o zi în care totul a devenit oficial, momentul în care ceea ce simțeam deja amândoi a primit și un nume,
+transformând „noi” într-o certitudine.
+
+Îți mai aduci aminte unde am oficializat relația?
+`,
         choices: [
           { label: "la ora 23.15 in club one", next: "q4" },
           { label: "la ora 12.20 in camin p21", next: "q3_wrong" },
@@ -391,9 +399,12 @@ la ce oră și în ce loc am oficializat relația?`,
       q4: {
         title: "Întrebarea 4",
         text:
-`dacă întrebarea ți s-a părut prea ușoară, să te văd la asta.
+`uneori nu doar locul contează, ci și contextul, întâmplarea, momentul exact, circumstanțele care au făcut ca două persoane să ajungă în același timp 
+și în același punct. Privind înapoi, pare aproape imposibil de imaginat că totul ar fi putut fi diferit
+dacă acea situație nu ar fi existat.
 
-în ce context s-a întâmplat să oficializăm relația?`,
+Întrebarea este: în ce context ne-am cunoscut?
+`,
         choices: [
           { label: "la bar", next: "final" },
           { label: "pe ringul de dans", next: "q4_wrong" },
