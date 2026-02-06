@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>💘</title>
+
+  <style>
+    :root{
+      --card-bg: rgba(0,0,0,.58);
+      --card-border: rgba(255,255,255,.18);
+      --text: rgba(255,255,255,.95);
+      --muted: rgba(255,255,255,.75);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--text);
+      overflow-x:hidden;
+    }
+
+    /* ✅ FUNDAL CU POZE (pe toate paginile) */
+    .bg{
+      position:fixed;
+      inset:0;
+      z-index:-2;
+      background:#111;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      opacity: 1;
+      transition: opacity 700ms ease;
+    }
+
+    /* overlay ca să se citească textul */
+    .overlay{
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      background: radial-gradient(ellipse at center,
+        rgba(0,0,0,.18) 0%,
+        rgba(0,0,0,.70) 70%,
+        rgba(0,0,0,.86) 100%);
+      pointer-events:none;
+    }
+
+    /* layout */
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 28px 16px;
+    }
+
+    .card{
+      width:min(860px, 100%);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 22px 80px rgba(0,0,0,.45);
+      padding: 22px;
+    }
+
+    .title{
+      font-size: clamp(22px, 3vw, 30px);
+      line-height: 1.15;
+      margin: 0 0 10px 0;
+      letter-spacing: .2px;
+      white-space: pre-wrap;
+    }
+
+    .text{
+      font-size: clamp(16px, 2.1vw, 18px);
+      line-height: 1.6;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+
+    .buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 16px;
+      font-weight: 650;
+      background: rgba(255,255,255,.92);
+      color:#111;
+      transition: transform 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(0px); opacity:.9; }
+
+    /* mic efect la schimbare de pagină */
+    .fade{ animation: fadeIn 240ms ease; }
+    @keyframes fadeIn{
+      from{ opacity:0; transform:translateY(6px); }
+      to{ opacity:1; transform:translateY(0); }
+    }
+
+    .footer{
+      margin-top: 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      opacity: .95;
+    }
+    .footer a{
+      color: var(--muted);
+      text-decoration:none;
+      border-bottom: 1px dashed rgba(255,255,255,.35);
+    }
+
+    /* mic control de sunet (opțional) */
+    .soundchip{
+      position:fixed;
+      right:12px;
+      bottom:12px;
+      z-index:10;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      padding: 10px 12px;
+      backdrop-filter: blur(10px);
+      color: var(--text);
+      font-size: 13px;
+      user-select:none;
+    }
+    .soundchip button{
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      color:#111;
+      font-weight: 700;
+    }
+    .soundchip input{
+      width: 110px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg" id="bg"></div>
+  <div class="overlay"></div>
+
+  <!-- ✅ MUZICĂ: pune fișierul în repo la /music/song.mp3 -->
+  <audio id="bgmusic" loop preload="auto">
+    <source src="music/song.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- control sunet (opțional, dar util) -->
+  <div class="soundchip" id="soundchip" style="display:none;">
+    <button id="toggleSound">🔊</button>
+    <span id="soundLabel">music</span>
+    <input id="volume" type="range" min="0" max="1" step="0.01" value="0.55" />
+  </div>
+
+  <div class="wrap">
+    <div class="card fade" id="card">
+      <h1 class="title" id="title"></h1>
+      <p class="text" id="text"></p>
+      <div class="buttons" id="buttons"></div>
+
+      <div class="footer">
+        <span id="progress"></span>
+        <a href="#" id="restart">repornește</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       0) CHECKLIST FIȘIERE (ca să nu te chinui)
+       Repo trebuie să aibă:
+       - index.html (acesta) în ROOT
+       - folder photos/ cu 1.jpg..5.jpg (sau câte ai)
+       - folder music/ cu song.mp3
+       Test:
+       https://dragosdm05.github.io/REPO_NAME/photos/1.jpg
+       https://dragosdm05.github.io/REPO_NAME/music/song.mp3
+       ========================================================= */
+
+    /* =========================================================
+       1) FUNDAL CU POZE (slideshow stabil)
+       ========================================================= */
+    const bgImages = [
+      "photos/1.jpg",
+      "photos/2.jpg",
+      "photos/3.jpg",
+      "photos/4.jpg",
+      "photos/5.jpg"
+    ];
+
+    const bg = document.getElementById("bg");
+    let bgIndex = 0;
+
+    function preloadImages(list){
+      list.forEach(src => { const img = new Image(); img.src = src; });
+    }
+
+    function setBackground(url){
+      bg.style.opacity = "0.18";
+      setTimeout(() => {
+        bg.style.backgroundImage = `url('${url}')`;
+        bg.style.opacity = "1";
+      }, 140);
+    }
+
+    preloadImages(bgImages);
+    setBackground(bgImages[0]);
+
+    setInterval(() => {
+      bgIndex = (bgIndex + 1) % bgImages.length;
+      setBackground(bgImages[bgIndex]);
+    }, 4500);
+
+
+    /* =========================================================
+       2) MUZICĂ (pornește la primul click, ca să nu fie blocată)
+       ========================================================= */
+    const music = document.getElementById("bgmusic");
+    const soundchip = document.getElementById("soundchip");
+    const toggleSound = document.getElementById("toggleSound");
+    const volume = document.getElementById("volume");
+    const soundLabel = document.getElementById("soundLabel");
+
+    let musicStarted = false;
+
+    // volum inițial
+    music.volume = 0.55;
+
+    function startMusicIfNeeded(){
+      if (musicStarted) return;
+
+      // încercăm play — dacă browserul refuză, nu stricăm pagina
+      music.play().then(() => {
+        musicStarted = true;
+        soundchip.style.display = "flex";
+        soundLabel.textContent = "music on";
+        toggleSound.textContent = "🔊";
+      }).catch(() => {
+        // dacă e blocat dintr-un motiv, rămâne oprit
+        soundchip.style.display = "flex";
+        soundLabel.textContent = "tap 🔊";
+        toggleSound.textContent = "🔇";
+      });
+    }
+
+    toggleSound.addEventListener("click", async () => {
+      try{
+        if (!musicStarted){
+          await music.play();
+          musicStarted = true;
+          toggleSound.textContent = "🔊";
+          soundLabel.textContent = "music on";
+          return;
+        }
+
+        if (music.paused){
+          await music.play();
+          toggleSound.textContent = "🔊";
+          soundLabel.textContent = "music on";
+        } else {
+          music.pause();
+          toggleSound.textContent = "🔇";
+          soundLabel.textContent = "music off";
+        }
+      } catch(e){
+        // ignorăm
+      }
+    });
+
+    volume.addEventListener("input", () => {
+      music.volume = Number(volume.value);
+    });
+
+
+    /* =========================================================
+       3) QUIZ FLOW (paginile tale)
+       ========================================================= */
+    const ui = {
+      title: document.getElementById("title"),
+      text: document.getElementById("text"),
+      buttons: document.getElementById("buttons"),
+      progress: document.getElementById("progress"),
+      restart: document.getElementById("restart"),
+      card: document.getElementById("card")
+    };
+
+    const PAGES = {
+      intro: {
+        title: "💘",
+        text:
+`Iubito, acum că ai intrat pe link-ul ăsta probabil ți-ai dat seama despre ce e vorba.
+Pentru autenticitate, am hotărât să te supun unui mic quiz despre relația noastră, acum, cu ocazia acestei minunate zile desemnate iubirii dintre noi.
+
+Ești pregătită?`,
+        choices: [
+          { label: "sunt pregătită iubitule", next: "q1" }
+        ]
+      },
+
+      q1: {
+        title: "Întrebarea 1",
+        text:
+`Prima întrebare e mai mult așa de acomodare :)))
+Cine a spus primul „te iubesc”?`,
+        choices: [
+          { label: "eu", next: "q2" },
+          { label: "tu", next: "q1_wrong" }
+        ]
+      },
+
+      q1_wrong: {
+        title: "Hehe 😌",
+        text:
+`naaah, ai greșit un pic.
+
+trebuie să recunosc că tu ai fost prima care a spus „te iubesc”, deși sunt sigur că eu am simțit primul`,
+        choices: [
+          { label: "mergem mai departe", next: "q2" }
+        ]
+      },
+
+      q2: {
+        title: "Întrebarea 2",
+        text:
+`foarte bine.
+
+dacă ai trecut de prima întrebare.
+următoarea întrebare este:
+
+de câte luni suntem împreună?`,
+        choices: [
+          { label: "15", next: "q3" },
+          { label: "14", next: "q2_wrong" }
+        ]
+      },
+
+      q2_wrong: {
+        title: "👀",
+        text: `mai gândește-te un pic.... :)))`,
+        choices: [
+          { label: "gata, știu", next: "q3" }
+        ]
+      },
+
+      q3: {
+        title: "Întrebarea 3",
+        text:
+`foarte bine, ai trecut și de întrebarea asta.
+să te văd acum.
+
+la ce oră și în ce loc am oficializat relația?`,
+        choices: [
+          { label: "la ora 23.15 in club one", next: "q4" },
+          { label: "la ora 12.20 in camin p21", next: "q3_wrong" },
+          { label: "la ora 03.30 in apartamentul in care stam", next: "q3_wrong" }
+        ]
+      },
+
+      q3_wrong: {
+        title: "Gotcha 😏",
+        text: `ahh.... iar te-am prins`,
+        choices: [
+          { label: "ok ok", next: "q4" }
+        ]
+      },
+
+      q4: {
+        title: "Întrebarea 4",
+        text:
+`dacă întrebarea ți s-a părut prea ușoară, să te văd la asta.
+
+în ce context s-a întâmplat să oficializăm relația?`,
+        choices: [
+          { label: "la bar", next: "final" },
+          { label: "pe ringul de dans", next: "q4_wrong" },
+          { label: "afară", next: "q4_wrong" }
+        ]
+      },
+
+      q4_wrong: {
+        title: "offf 🙃",
+        text: `offf`,
+        choices: [
+          { label: "hai mai departe", next: "final" }
+        ]
+      },
+
+      final: {
+        title: "💌",
+        text:
+`asta a fost și quiz-ul, iubito, dacă ai ajuns până aici vreau să îți transmit câteva cuvinte.
+
+nu știu dacă există cuvinte suficient de bune pentru ce simt pentru tine, dar știu sigur că, de când ești în viața mea, nimic nu mai e la fel. în cel mai frumos mod posibil.
+
+ai reușit, fără să forțezi nimic, fără gesturi mari, doar fiind tu, să devii persoana la care mă gândesc prima, cu care vreau să împart tot și lângă care simt că pot fi exact așa cum sunt.
+
+cu tine am învățat că liniștea poate fi mai prețioasă decât orice, că un zâmbet poate schimba o zi întreagă și că „acasă” nu e un loc, ci o persoană.
+
+de 1 an și 3 luni viața mea e mai caldă, mai bună și mai plină, pentru că ești tu în ea. și nu trece o zi în care să nu fiu recunoscător pentru asta.
+
+îmi place cum suntem împreună. îmi place ce simt când sunt lângă tine. îmi place „noi” mai mult decât pot să explic.
+
+și azi vreau doar să-ți spun, din tot sufletul:
+
+do you wanna be my valentine? ❤️`,
+        choices: [
+          { label: "DAAA 💘", next: "end" }
+        ]
+      },
+
+      end: {
+        title: "🥰",
+        text: `știam eu.\n\nte iubesc.`,
+        choices: [
+          { label: "mai o dată", next: "intro" }
+        ]
+      }
+    };
+
+    function render(pageId){
+      const page = PAGES[pageId];
+
+      ui.card.classList.remove("fade");
+      void ui.card.offsetWidth;
+      ui.card.classList.add("fade");
+
+      ui.title.textContent = page.title;
+      ui.text.textContent = page.text;
+
+      ui.buttons.innerHTML = "";
+      page.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.textContent = choice.label;
+
+        btn.addEventListener("click", () => {
+          // ✅ pornește muzica la primul click
+          startMusicIfNeeded();
+          render(choice.next);
+        });
+
+        ui.buttons.appendChild(btn);
+      });
+
+      ui.progress.textContent = `pagina: ${pageId}`;
+    }
+
+    ui.restart.addEventListener("click", (e) => {
+      e.preventDefault();
+      render("intro");
+    });
+
+    render("intro");
+  </script>
+</body>
+</html>
